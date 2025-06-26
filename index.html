@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flashcard Study App</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="assets/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="assets/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="assets/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/site.webmanifest" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🧠 Flashcard Study</h1>
+      </header>
+
+      <main>
+        <form id="deck-form">
+          <label for="deck-name" class="visually-hidden">Deck Name</label>
+          <input
+            type="text"
+            placeholder="Deck Folder Name (e.g. Math)"
+            id="deck-name"
+            required
+            autocomplete="off"
+          />
+          <button type="button" id="create-deck-btn">+ New Deck</button>
+        </form>
+      </main>
+
+      <section class="deck-section">
+        <h2 class="visually-hidden">Your Flashcards</h2>
+        <ul id="deck-list" class="card-container"></ul>
+      </section>
+
+      <!-- Add this section for future card creation functionality -->
+      <section id="add-card-section" class="hidden">
+        <h3>Add Card</h3>
+        <form id="card-form">
+          <select id="deck-select">
+            <option value="">Select a deck...</option>
+          </select>
+          <div class="card-inputs">
+            <label for="card-question">Question:</label>
+            <textarea
+              id="card-question"
+              placeholder="Enter your question"
+              required
+            ></textarea>
+
+            <label for="card-answer">Answer:</label>
+            <textarea
+              id="card-answer"
+              placeholder="Enter the answer"
+              required
+            ></textarea>
+          </div>
+          <button type="button" id="add-card-btn">Add Card</button>
+          <button type="button" id="cancel-card-btn">Cancel</button>
+        </form>
+      </section>
+
+      <div id="controls">
+        <button type="button" id="show-add-card-btn">+ Add Card</button>
+      </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
