@@ -87,7 +87,7 @@ onValue(DeckDB, (snapshot) => {
             if (deckData.cards) {
                 for (let [cardId, cardData] of Object.entries(deckData.cards)) {
                     if (cardData.question && cardData.answer) {
-                        renderFlashCard(cardData, deckData.name);
+                        renderFlashCard(cardData, deckData.name, deckId, cardId);
                     }
                 }
             }
@@ -141,7 +141,7 @@ cancelCardBtn.addEventListener("click", () => {
 // ===============================
 // 🎴 Render Flashcard (Flip Style)
 // ===============================
-function renderFlashCard(cardData, deckName) {
+function renderFlashCard(cardData, deckName, deckId, cardId) {
     const cardEl = document.createElement("li");
     cardEl.className = "flash-card";
 
@@ -158,6 +158,21 @@ function renderFlashCard(cardData, deckName) {
       </div>
     </div>
   `;
+
+    // 🗑️ Double-click to delete
+    cardEl.addEventListener("dblclick", () => {
+        const confirmDelete = confirm("Do you want to delete this flashcard?");
+        if (confirmDelete) {
+            const cardRef = ref(database, `DeckList/${deckId}/cards/${cardId}`);
+            remove(cardRef).then(() => {
+                alert("Flashcard deleted.");
+                cardEl.remove(); // Also remove from UI
+            })
+                .catch((error) => {
+                    alert("Failed to delete flashcard: " + error.message);
+                });
+        }
+    });
 
     deckList.appendChild(cardEl);
 }
