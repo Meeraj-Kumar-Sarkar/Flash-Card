@@ -60,7 +60,7 @@ header h1 {
 #deck-list {
   margin-top: 30px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 10px;
   list-style: none;
   padding: 0;
