@@ -44,8 +44,14 @@
         </form>
       </main>
 
-      <section class="deck-section">
-        <h2 class="visually-hidden">Your Flashcards</h2>
+      <section>
+        <h2>Your Flashcards</h2>
+        <div id="controls">
+          <label for="filter-deck">Filter by Deck:</label>
+          <select id="filter-deck">
+            <option value="">All Decks</option>
+          </select>
+        </div>
         <ul id="deck-list" class="card-container"></ul>
       </section>
 
