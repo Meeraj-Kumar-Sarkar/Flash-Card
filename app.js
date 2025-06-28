@@ -18,6 +18,7 @@ const addCardBtn = document.getElementById("add-card-btn");
 const cancelCardBtn = document.getElementById("cancel-card-btn");
 const showAddCardBtn = document.getElementById("show-add-card-btn");
 const addCardSection = document.getElementById("add-card-section");
+const filterDeckSelect = document.getElementById("filter-deck");
 
 // ===============================
 // 🧠 Create New Deck
@@ -72,19 +73,25 @@ createDeckBtn.addEventListener("click", () => {
 onValue(DeckDB, (snapshot) => {
     clearDeckList();
     clearDeckDropdown();
+    clearFilterDropdown();
 
     if (snapshot.exists()) {
         const decks = Object.entries(snapshot.val());
 
         for (let [deckId, deckData] of decks) {
-            // Add to dropdown
+            // Add to dropdowns
             const option = document.createElement("option");
             option.value = deckId;
             option.textContent = deckData.name;
             deckSelect.appendChild(option);
 
-            // Show cards from each deck
-            if (deckData.cards) {
+            const filterOption = document.createElement("option");
+            filterOption.value = deckId;
+            filterOption.textContent = deckData.name;
+            filterDeckSelect.appendChild(filterOption);
+
+            // Show cards based on filter
+            if (deckData.cards && (!filterDeckSelect.value || filterDeckSelect.value === deckId)) {
                 for (let [cardId, cardData] of Object.entries(deckData.cards)) {
                     if (cardData.question && cardData.answer) {
                         renderFlashCard(cardData, deckData.name, deckId, cardId);
@@ -95,6 +102,45 @@ onValue(DeckDB, (snapshot) => {
     } else {
         deckList.textContent = "No Content Added";
     }
+});
+
+// ===============================
+// 🔍 Filter Cards by Deck
+// ===============================
+filterDeckSelect.addEventListener("change", () => {
+    onValue(DeckDB, (snapshot) => {
+        clearDeckList();
+
+        if (snapshot.exists()) {
+            const decks = Object.entries(snapshot.val());
+            const selectedDeckId = filterDeckSelect.value;
+
+            if (selectedDeckId === "") {
+                // Show all cards
+                for (let [deckId, deckData] of decks) {
+                    if (deckData.cards) {
+                        for (let [cardId, cardData] of Object.entries(deckData.cards)) {
+                            if (cardData.question && cardData.answer) {
+                                renderFlashCard(cardData, deckData.name, deckId, cardId);
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Show cards from selected deck
+                const deckData = decks.find(([deckId]) => deckId === selectedDeckId)?.[1];
+                if (deckData?.cards) {
+                    for (let [cardId, cardData] of Object.entries(deckData.cards)) {
+                        if (cardData.question && cardData.answer) {
+                            renderFlashCard(cardData, deckData.name, selectedDeckId, cardId);
+                        }
+                    }
+                }
+            }
+        } else {
+            deckList.textContent = "No Content Added";
+        }
+    }, { onlyOnce: true });
 });
 
 // ===============================
@@ -186,4 +232,8 @@ function clearDeckList() {
 
 function clearDeckDropdown() {
     deckSelect.innerHTML = `<option value="">Select a deck...</option>`;
+}
+
+function clearFilterDropdown() {
+    filterDeckSelect.innerHTML = `<option value="">All Decks</option>`;
 }
