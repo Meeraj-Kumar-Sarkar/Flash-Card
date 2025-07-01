@@ -237,3 +237,24 @@ function clearDeckDropdown() {
 function clearFilterDropdown() {
     filterDeckSelect.innerHTML = `<option value="">All Decks</option>`;
 }
+
+// ===============================
+// 🎨 Theme Switcher
+// ===============================
+const themeToggle = document.getElementById("theme-toggle");
+const docEl = document.documentElement;
+
+// Apply saved theme on load
+const savedTheme = localStorage.getItem("theme") || "light";
+docEl.setAttribute("data-theme", savedTheme);
+themeToggle.checked = savedTheme === "dark";
+
+themeToggle.addEventListener("change", () => {
+  if (themeToggle.checked) {
+    docEl.setAttribute("data-theme", "dark");
+    localStorage.setItem("theme", "dark");
+  } else {
+    docEl.setAttribute("data-theme", "light");
+    localStorage.setItem("theme", "light");
+  }
+});
