@@ -55,16 +55,9 @@
         </form>
       </main>
 
-      <section>
-        <div id="controls">
-          <label for="filter-deck">Filter by Deck:</label>
-          <select id="filter-deck">
-            <option value="">All Decks</option>
-          </select>
-        </div>
-        <ul id="deck-list" class="card-container"></ul>
-      </section>
-
+      <div id="controls">
+        <button type="button" id="show-add-card-btn">+ Add New Card</button>
+      </div>
       <section id="add-card-section" class="hidden">
         <h3>Add a New Flashcard</h3>
         <form id="card-form">
@@ -93,9 +86,16 @@
         </form>
       </section>
 
-      <div id="controls">
-        <button type="button" id="show-add-card-btn">+ Add New Card</button>
-      </div>
+      <section>
+        <div id="controls">
+          <label for="filter-deck">Filter by Deck:</label>
+          <select id="filter-deck">
+            <option value="">All Decks</option>
+          </select>
+        </div>
+        <ul id="deck-list" class="card-container"></ul>
+      </section>
+
     </div>
 
     <script type="module" src="app.js"></script>
