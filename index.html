@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flashcard Study App</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link
       rel="apple-touch-icon"
       sizes="180x180"
@@ -25,9 +28,13 @@
     <link rel="manifest" href="/site.webmanifest" />
   </head>
   <body>
+    <div id="loader" class="loader-overlay">
+        <div class="loader"></div>
+    </div>
     <div class="container">
       <header>
-        <h1>🧠 Flashcard Study</h1>
+        <h1>
+ Flashcard Study</h1>
         <div class="theme-switcher">
           <label for="theme-toggle">Dark Mode</label>
           <input type="checkbox" id="theme-toggle" />
@@ -39,7 +46,7 @@
           <label for="deck-name" class="visually-hidden">Deck Name</label>
           <input
             type="text"
-            placeholder="Deck Folder Name (e.g. Math)"
+            placeholder="Enter Deck Name (e.g., Science)"
             id="deck-name"
             required
             autocomplete="off"
@@ -49,7 +56,6 @@
       </main>
 
       <section>
-        <h2>Your Flashcards</h2>
         <div id="controls">
           <label for="filter-deck">Filter by Deck:</label>
           <select id="filter-deck">
@@ -59,9 +65,8 @@
         <ul id="deck-list" class="card-container"></ul>
       </section>
 
-      <!-- Add this section for future card creation functionality -->
       <section id="add-card-section" class="hidden">
-        <h3>Add Card</h3>
+        <h3>Add a New Flashcard</h3>
         <form id="card-form">
           <select id="deck-select">
             <option value="">Select a deck...</option>
@@ -70,24 +75,26 @@
             <label for="card-question">Question:</label>
             <textarea
               id="card-question"
-              placeholder="Enter your question"
+              placeholder="What is the powerhouse of the cell?"
               required
             ></textarea>
 
             <label for="card-answer">Answer:</label>
             <textarea
               id="card-answer"
-              placeholder="Enter the answer"
+              placeholder="Mitochondria"
               required
             ></textarea>
           </div>
-          <button type="button" id="add-card-btn">Add Card</button>
-          <button type="button" id="cancel-card-btn">Cancel</button>
+          <div class="form-buttons">
+              <button type="button" id="add-card-btn">Add Card</button>
+              <button type="button" id="cancel-card-btn">Cancel</button>
+          </div>
         </form>
       </section>
 
       <div id="controls">
-        <button type="button" id="show-add-card-btn">+ Add Card</button>
+        <button type="button" id="show-add-card-btn">+ Add New Card</button>
       </div>
     </div>
 
