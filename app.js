@@ -1,36 +1,38 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js';
+import { getDatabase, ref, push, onValue, remove } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
 
 const appSettings = {
-    databaseURL: "https://deck-f7da2-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    databaseURL: 'https://deck-f7da2-default-rtdb.asia-southeast1.firebasedatabase.app/',
 };
 
 const app = initializeApp(appSettings);
 const database = getDatabase(app);
-const DeckDB = ref(database, "DeckList");
+const DeckDB = ref(database, 'DeckList');
 
 // DOM Elements
-const createDeckBtn = document.getElementById("create-deck-btn");
-const deckNameInput = document.getElementById("deck-name");
-const deckList = document.getElementById("deck-list");
-const deckSelect = document.getElementById("deck-select");
-const addCardBtn = document.getElementById("add-card-btn");
-const cancelCardBtn = document.getElementById("cancel-card-btn");
-const showAddCardBtn = document.getElementById("show-add-card-btn");
-const addCardSection = document.getElementById("add-card-section");
-const filterDeckSelect = document.getElementById("filter-deck");
+const createDeckBtn = document.getElementById('create-deck-btn');
+const deckNameInput = document.getElementById('deck-name');
+const deckList = document.getElementById('deck-list');
+const deckSelect = document.getElementById('deck-select');
+const addCardBtn = document.getElementById('add-card-btn');
+const cancelCardBtn = document.getElementById('cancel-card-btn');
+const showAddCardBtn = document.getElementById('show-add-card-btn');
+const addCardSection = document.getElementById('add-card-section');
+const filterDeckSelect = document.getElementById('filter-deck');
+const loader = document.getElementById('loader');
 
 // ===============================
 // 🧠 Create New Deck
 // ===============================
-createDeckBtn.addEventListener("click", () => {
+createDeckBtn.addEventListener('click', () => {
     const deckName = deckNameInput.value.trim();
 
-    if (deckName === "") {
-        alert("Deck name cannot be empty.");
+    if (deckName === '') {
+        showToast('Deck name cannot be empty.', 'error');
         return;
     }
 
+    showLoader();
     onValue(DeckDB, (snapshot) => {
         let exists = false;
         let duplicateKey = null;
@@ -46,23 +48,22 @@ createDeckBtn.addEventListener("click", () => {
         }
 
         if (exists) {
-            const override = confirm(`Deck "${deckName}" already exists. Override it?`);
-            if (override) {
+            hideLoader();
+            showConfirmationModal(`Deck '${deckName}' already exists. Override it?`, () => {
+                showLoader();
                 const targetRef = ref(database, `DeckList/${duplicateKey}`);
                 remove(targetRef).then(() => {
                     push(DeckDB, { name: deckName, cards: {} });
-                    deckNameInput.value = "";
+                    deckNameInput.value = '';
+                    hideLoader();
+                    showToast('Deck overridden successfully!', 'success');
                 });
-            } else {
-                const newName = prompt("Enter a new deck name:");
-                if (newName) {
-                    push(DeckDB, { name: newName.trim(), cards: {} });
-                    deckNameInput.value = "";
-                }
-            }
+            });
         } else {
             push(DeckDB, { name: deckName, cards: {} });
-            deckNameInput.value = "";
+            deckNameInput.value = '';
+            hideLoader();
+            showToast('Deck created successfully!', 'success');
         }
     }, { onlyOnce: true });
 });
@@ -70,6 +71,7 @@ createDeckBtn.addEventListener("click", () => {
 // ===============================
 // 🪄 Load Decks and Cards
 // ===============================
+showLoader();
 onValue(DeckDB, (snapshot) => {
     clearDeckList();
     clearDeckDropdown();
@@ -80,12 +82,12 @@ onValue(DeckDB, (snapshot) => {
 
         for (let [deckId, deckData] of decks) {
             // Add to dropdowns
-            const option = document.createElement("option");
+            const option = document.createElement('option');
             option.value = deckId;
             option.textContent = deckData.name;
             deckSelect.appendChild(option);
 
-            const filterOption = document.createElement("option");
+            const filterOption = document.createElement('option');
             filterOption.value = deckId;
             filterOption.textContent = deckData.name;
             filterDeckSelect.appendChild(filterOption);
@@ -100,14 +102,16 @@ onValue(DeckDB, (snapshot) => {
             }
         }
     } else {
-        deckList.textContent = "No Content Added";
+        deckList.innerHTML = '<p class="empty-state">No decks available. Create one to get started!</p>';
     }
+    hideLoader();
 });
 
 // ===============================
 // 🔍 Filter Cards by Deck
 // ===============================
-filterDeckSelect.addEventListener("change", () => {
+filterDeckSelect.addEventListener('change', () => {
+    showLoader();
     onValue(DeckDB, (snapshot) => {
         clearDeckList();
 
@@ -115,7 +119,7 @@ filterDeckSelect.addEventListener("change", () => {
             const decks = Object.entries(snapshot.val());
             const selectedDeckId = filterDeckSelect.value;
 
-            if (selectedDeckId === "") {
+            if (selectedDeckId === '') {
                 // Show all cards
                 for (let [deckId, deckData] of decks) {
                     if (deckData.cards) {
@@ -138,49 +142,53 @@ filterDeckSelect.addEventListener("change", () => {
                 }
             }
         } else {
-            deckList.textContent = "No Content Added";
+            deckList.innerHTML = '<p class="empty-state">No cards found in this deck.</p>';
         }
+        hideLoader();
     }, { onlyOnce: true });
 });
 
 // ===============================
 // ✨ Add New Flashcard
 // ===============================
-addCardBtn.addEventListener("click", () => {
+addCardBtn.addEventListener('click', () => {
     const selectedDeckId = deckSelect.value;
-    const question = document.getElementById("card-question").value.trim();
-    const answer = document.getElementById("card-answer").value.trim();
+    const question = document.getElementById('card-question').value.trim();
+    const answer = document.getElementById('card-answer').value.trim();
 
     if (!selectedDeckId) {
-        alert("Please select a deck.");
+        showToast('Please select a deck.', 'error');
         return;
     }
 
     if (!question || !answer) {
-        alert("Both question and answer are required.");
+        showToast('Both question and answer are required.', 'error');
         return;
     }
 
+    showLoader();
     const cardsRef = ref(database, `DeckList/${selectedDeckId}/cards`);
     push(cardsRef, { question, answer }).then(() => {
-        alert("Card added.");
-        document.getElementById("card-question").value = "";
-        document.getElementById("card-answer").value = "";
-        addCardSection.classList.add("hidden");
+        hideLoader();
+        showToast('Card added successfully!', 'success');
+        document.getElementById('card-question').value = '';
+        document.getElementById('card-answer').value = '';
+        addCardSection.classList.add('hidden');
     });
 });
 
 // ===============================
 // 👁️ Show/Hide Card Form
 // ===============================
-showAddCardBtn.addEventListener("click", () => {
-    addCardSection.classList.remove("hidden");
+showAddCardBtn.addEventListener('click', () => {
+    addCardSection.classList.remove('hidden');
+    addCardSection.scrollIntoView({ behavior: 'smooth' });
 });
 
-cancelCardBtn.addEventListener("click", () => {
-    addCardSection.classList.add("hidden");
-    document.getElementById("card-question").value = "";
-    document.getElementById("card-answer").value = "";
+cancelCardBtn.addEventListener('click', () => {
+    addCardSection.classList.add('hidden');
+    document.getElementById('card-question').value = '';
+    document.getElementById('card-answer').value = '';
     deckSelect.selectedIndex = 0;
 });
 
@@ -188,36 +196,45 @@ cancelCardBtn.addEventListener("click", () => {
 // 🎴 Render Flashcard (Flip Style)
 // ===============================
 function renderFlashCard(cardData, deckName, deckId, cardId) {
-    const cardEl = document.createElement("li");
-    cardEl.className = "flash-card";
+    const cardEl = document.createElement('li');
+    cardEl.className = 'flash-card';
 
     cardEl.innerHTML = `
-    <div class="flash-card-inner">
-      <div class="flash-card-front">
-        <div class="deck-name">${deckName}</div>
+    <div class='flash-card-inner'>
+      <div class='flash-card-front'>
+        <div class='deck-name'>${deckName}</div>
         <strong>Q:</strong>
         <p>${cardData.question}</p>
       </div>
-      <div class="flash-card-back">
+      <div class='flash-card-back'>
         <strong>A:</strong>
         <p>${cardData.answer}</p>
+        <button class='delete-card-btn' data-deck-id='${deckId}' data-card-id='${cardId}'>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        </button>
       </div>
     </div>
   `;
 
-    // 🗑️ Double-click to delete
-    cardEl.addEventListener("dblclick", () => {
-        const confirmDelete = confirm("Do you want to delete this flashcard?");
-        if (confirmDelete) {
+    cardEl.addEventListener('click', () => {
+        cardEl.classList.toggle('is-flipped');
+    });
+
+    const deleteBtn = cardEl.querySelector('.delete-card-btn');
+    deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent card from flipping
+        showConfirmationModal('Do you want to delete this flashcard?', () => {
+            showLoader();
             const cardRef = ref(database, `DeckList/${deckId}/cards/${cardId}`);
             remove(cardRef).then(() => {
-                alert("Flashcard deleted.");
-                cardEl.remove(); // Also remove from UI
-            })
-                .catch((error) => {
-                    alert("Failed to delete flashcard: " + error.message);
-                });
-        }
+                hideLoader();
+                showToast('Flashcard deleted.', 'success');
+                cardEl.remove();
+            }).catch((error) => {
+                hideLoader();
+                showToast(`Failed to delete flashcard: ${error.message}`, 'error');
+            });
+        });
     });
 
     deckList.appendChild(cardEl);
@@ -227,34 +244,93 @@ function renderFlashCard(cardData, deckName, deckId, cardId) {
 // 🧹 Helpers
 // ===============================
 function clearDeckList() {
-    deckList.innerHTML = "";
+    deckList.innerHTML = '';
 }
 
 function clearDeckDropdown() {
-    deckSelect.innerHTML = `<option value="">Select a deck...</option>`;
+    deckSelect.innerHTML = '<option value="">Select a deck...</option>';
 }
 
 function clearFilterDropdown() {
-    filterDeckSelect.innerHTML = `<option value="">All Decks</option>`;
+    filterDeckSelect.innerHTML = '<option value="">All Decks</option>';
+}
+
+function showLoader() {
+    loader.style.display = 'flex';
+}
+
+function hideLoader() {
+    loader.style.display = 'none';
 }
 
 // ===============================
 // 🎨 Theme Switcher
 // ===============================
-const themeToggle = document.getElementById("theme-toggle");
+const themeToggle = document.getElementById('theme-toggle');
 const docEl = document.documentElement;
 
-// Apply saved theme on load
-const savedTheme = localStorage.getItem("theme") || "light";
-docEl.setAttribute("data-theme", savedTheme);
-themeToggle.checked = savedTheme === "dark";
+const savedTheme = localStorage.getItem('theme') || 'light';
+docEl.setAttribute('data-theme', savedTheme);
+themeToggle.checked = savedTheme === 'dark';
 
-themeToggle.addEventListener("change", () => {
+themeToggle.addEventListener('change', () => {
   if (themeToggle.checked) {
-    docEl.setAttribute("data-theme", "dark");
-    localStorage.setItem("theme", "dark");
+    docEl.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
   } else {
-    docEl.setAttribute("data-theme", "light");
-    localStorage.setItem("theme", "light");
+    docEl.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
   }
 });
+
+// ===============================
+// 🍞 Custom Toast Notifications
+// ===============================
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// ===============================
+// ❓ Custom Confirmation Modal
+// ===============================
+function showConfirmationModal(message, onConfirm) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+        <div class='modal-content'>
+            <p>${message}</p>
+            <div class='modal-buttons'>
+                <button id='confirm-btn'>Confirm</button>
+                <button id='cancel-btn'>Cancel</button>
+            </div>
+        </div>
+    `;
+
+    const confirmBtn = modal.querySelector('#confirm-btn');
+    const cancelBtn = modal.querySelector('#cancel-btn');
+
+    confirmBtn.addEventListener('click', () => {
+        onConfirm();
+        document.body.removeChild(modal);
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+
+    document.body.appendChild(modal);
+}
