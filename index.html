@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flashcard Study App</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link
       rel="apple-touch-icon"
       sizes="180x180"
@@ -29,12 +32,11 @@
   </head>
   <body>
     <div id="loader" class="loader-overlay">
-        <div class="loader"></div>
+      <div class="loader"></div>
     </div>
     <div class="container">
       <header>
-        <h1>
- Flashcard Study</h1>
+        <h1>Flashcard Study</h1>
         <div class="theme-switcher">
           <label for="theme-toggle">Dark Mode</label>
           <input type="checkbox" id="theme-toggle" />
@@ -80,8 +82,8 @@
             ></textarea>
           </div>
           <div class="form-buttons">
-              <button type="button" id="add-card-btn">Add Card</button>
-              <button type="button" id="cancel-card-btn">Cancel</button>
+            <button type="button" id="add-card-btn">Add Card</button>
+            <button type="button" id="cancel-card-btn">Cancel</button>
           </div>
         </form>
       </section>
@@ -93,9 +95,8 @@
             <option value="">All Decks</option>
           </select>
         </div>
-        <ul id="deck-list" class="card-container"></ul>
+        <ul id="deck-list" class="card-container pokemon-card"></ul>
       </section>
-
     </div>
 
     <script type="module" src="app.js"></script>
